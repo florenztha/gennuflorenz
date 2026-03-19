@@ -1678,8 +1678,8 @@ function AppContent() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-[#F8F9FA] p-8">
-        <div className="w-20 h-20 bg-emerald-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-600/20 mb-8">
-          <Sparkles className="text-white w-10 h-10" />
+        <div className="w-20 h-20 rounded-3xl overflow-hidden shadow-2xl mb-8">
+        <img src="/nuflorenz.png" alt="Logo" className="w-full h-full object-cover" />
         </div>
         <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Genlayer Studio AI</h1>
         <p className="text-gray-500 mb-8 text-center max-w-sm">
