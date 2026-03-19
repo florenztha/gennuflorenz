@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required)
+    //   - walletAddress: string (required)
+    //   - credits: number (required)
+    //   - updatedAt: string (optional, date-time)
+    //
+    // Collection: transactions
+    // Document ID: {txHash}
+    // Fields:
+    //   - txHash: string (required)
+    //   - uid: string (required)
+    //   - amount: number (required)
+    //   - creditsAdded: number (required)
+    //   - timestamp: string (required, date-time)
+    //   - status: string (required, enum: ["pending", "completed", "failed"])
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "vr.telnet@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidUser(data) {
+      return data.uid is string &&
+             data.walletAddress is string &&
+             data.credits is number && data.credits >= 0;
+    }
+
+    function isValidTransaction(data) {
+      return data.txHash is string &&
+             data.uid is string &&
+             data.amount is number && data.amount > 0 &&
+             data.creditsAdded is number && data.creditsAdded > 0 &&
+             data.timestamp is string &&
+             data.status in ["pending", "completed", "failed"];
+    }
+
+    // ===============================================================
+    // Match Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && hasOnlyAllowedFields(['uid', 'walletAddress', 'credits', 'updatedAt']);
+      allow update: if (isOwner(userId) || isAdmin()) && isValidUser(request.resource.data) && hasOnlyAllowedFields(['uid', 'walletAddress', 'credits', 'updatedAt']);
+    }
+
+    match /transactions/{txHash} {
+      allow read: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid && isValidTransaction(request.resource.data);
+      allow update: if isAdmin();
+    }
+  }
+}

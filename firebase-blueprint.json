@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with credit balance and wallet address",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "walletAddress": { "type": "string", "description": "Connected Web3 wallet address" },
+        "credits": { "type": "number", "description": "Current credit balance" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["uid", "walletAddress", "credits"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "History of credit purchases",
+      "type": "object",
+      "properties": {
+        "txHash": { "type": "string", "description": "Blockchain transaction hash" },
+        "uid": { "type": "string", "description": "User UID" },
+        "amount": { "type": "number", "description": "Amount of GEN tokens paid" },
+        "creditsAdded": { "type": "number", "description": "Number of credits added" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Transaction timestamp" },
+        "status": { "type": "string", "enum": ["pending", "completed", "failed"] }
+      },
+      "required": ["txHash", "uid", "amount", "creditsAdded", "timestamp", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profile documents"
+    },
+    "/transactions/{txHash}": {
+      "schema": "Transaction",
+      "description": "Transaction history documents"
+    }
+  }
+}
