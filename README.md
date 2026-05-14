@@ -28,3 +28,27 @@ The platform operates on the GenLayer Testnet. Use the following details to conf
 4.  **Select a Tool:** Choose a category from the sidebar (e.g., Content Lab) and select a specific tool (e.g., Blog Post Generator).
 5.  **Generate Content:** Fill in the required fields and click "Generate". Each generation costs 10 credits.
 6.  **Download/Copy:** Once generated, you can copy the text or download the images/videos to your device.
+
+# GenLayer Intelligent Contracts
+
+This project includes Python-based GenLayer Intelligent Contracts.
+
+## Features
+
+- AI Prompt Validation
+- Content Moderation
+- Credit Authorization
+- Web3 Payment Logic
+
+## Contract Files
+
+- contracts/ai_content_contract.py
+- contracts/moderation_contract.py
+
+## Stack
+
+- React + TypeScript
+- Firebase
+- Gemini AI
+- GenLayer Testnet
+- Python Intelligent Contracts
