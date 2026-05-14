@@ -308,7 +308,7 @@ const PromptOutput = ({ prompt, result, imageUrl, loading, toolId, outputType }:
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold flex items-center gap-2 text-emerald-600 uppercase tracking-wider">
               <Sparkles className="w-4 h-4" />
-              {toolId === 6 ? 'RESULT IMAGE' : 'GENERATION RESULT (GEMINI 3.1 PRO)'}
+              {toolId === 6 ? 'RESULT IMAGE' : 'GENERATION RESULT'}
             </h3>
             <div className="flex items-center gap-3">
               {result && (
