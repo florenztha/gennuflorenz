@@ -34,6 +34,7 @@ async function testConnection() {
   }
 }
 testConnection();
+import { validatePrompt } from './services/contractService';
 import { 
   Sparkles, 
   Copy, 
@@ -1304,6 +1305,11 @@ function AppContent() {
   const [showBuyCredits, setShowBuyCredits] = useState(false);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
+  // Contract State
+  const [contractStatus, setContractStatus] = useState("");
+  const [contractApproved, setContractApproved] = useState(false);
+  const [contractLogs, setContractLogs] = useState<string[]>([]);
+
   // Initialize Firebase Auth
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -1411,6 +1417,9 @@ function AppContent() {
     setGeneratedPrompt('');
     setGeneratedResult('');
     setGeneratedImage('');
+    setContractStatus('');
+    setContractApproved(false);
+    setContractLogs([]);
 
     let systemInstruction = "";
     
@@ -1615,6 +1624,23 @@ function AppContent() {
         `;
         break;
     }
+
+    // Contract Validation
+    setContractStatus("Validating Intelligent Contract...");
+    setContractApproved(false);
+
+    const validation = await validatePrompt(userInput);
+
+    if (!validation.approved) {
+      setContractStatus(`Blocked: ${validation.reason}`);
+      setContractLogs(prev => [...prev, `Prompt blocked: ${validation.reason}`]);
+      setLoading(false);
+      return;
+    }
+
+    setContractStatus("Contract Approved");
+    setContractApproved(true);
+    setContractLogs(prev => [...prev, "Prompt validated successfully"]);
 
     const result = await generateOptimizedPrompt(systemInstruction, userInput, images, {
       responseMimeType: isDualOutput ? "application/json" : "text/plain",
@@ -1852,6 +1878,9 @@ function AppContent() {
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
               <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">System Online</span>
             </div>
+            <div className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">
+              Intelligent Contract Active
+            </div>
           </div>
         </header>
 
@@ -1866,6 +1895,11 @@ function AppContent() {
                   onClick={() => {
                     setActiveTool(tool);
                     setGeneratedPrompt('');
+                    setGeneratedResult('');
+                    setGeneratedImage('');
+                    setContractStatus('');
+                    setContractApproved(false);
+                    setContractLogs([]);
                   }}
                   className={`flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     activeTool.id === tool.id 
@@ -1895,6 +1929,33 @@ function AppContent() {
                     <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">{activeTool.name}</h2>
                     <p className="text-gray-500 text-sm mt-1 font-medium">{activeTool.description}</p>
                   </div>
+                </div>
+
+                {/* Contract Status Panel */}
+                <div className="mb-6 p-4 rounded-xl border border-emerald-200 bg-emerald-50">
+                  <div className="text-sm font-bold text-emerald-700">
+                    GenLayer Intelligent Contract
+                  </div>
+
+                  <div className="text-xs text-emerald-600 mt-1">
+                    {contractStatus || "Waiting for validation"}
+                  </div>
+
+                  {contractApproved && (
+                    <div className="text-xs text-green-700 mt-2">
+                      ✔ Prompt Approved
+                    </div>
+                  )}
+
+                  {contractLogs.length > 0 && (
+                    <div className="mt-3 space-y-1">
+                      {contractLogs.slice(-3).map((log, i) => (
+                        <div key={i} className="text-xs text-gray-500">
+                          {log}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Dynamic Tool Form */}
